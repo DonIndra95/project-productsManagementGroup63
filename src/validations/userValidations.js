@@ -1,6 +1,6 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
-
+const mongoose = require('mongoose')
 // function for string verification
 const isValid = function (value) {
   if (typeof value == "undefined" || value == null) return false;
@@ -8,6 +8,10 @@ const isValid = function (value) {
   if (typeof value == "string" && value.trim().length == 0) return false;
   else if (typeof value == "string") return true;
 };
+
+const isValidObjectId = function (objectId) {
+  return mongoose.Types.ObjectId.isValid(objectId)
+}
 
 // function for name verification
 const isValidFname = function (name) {
@@ -228,3 +232,4 @@ const userValidation = async (req, res, next) => {
 };
 
 module.exports = { userValidation };
+module.exports = { isValid, isValidObjectId}

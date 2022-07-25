@@ -20,5 +20,18 @@ let uploadFile=(file)=>{
         return resolve(data.Location)
     })})
 }
-    
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports={uploadFile}
