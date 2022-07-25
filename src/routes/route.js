@@ -6,7 +6,7 @@ const router= express.Router()
 //User API
 
 router.post("/register",userValidation,userRegister)
-router.get('/user/:userId/profile', userAuthentication,userRegister.getUserDetails)
+router.get('/user/:userId/profile', userAuthentication,userRegister)
 
 
 module.exports=router
