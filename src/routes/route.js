@@ -1,12 +1,14 @@
 const express= require("express")
-const { userRegister } = require("../controllers/userController")
-const { userValidation } = require("../validations/userValidations")
+const { authentication, authorization } = require("../auth/auth")
+const { userRegister, putUser, loginUser, getUserDetails } = require("../controllers/userController")
+const { userValidation, putUserValidations } = require("../validations/userValidations")
 const router= express.Router()
 
-//User API
+//User APIs
 
 router.post("/register",userValidation,userRegister)
-router.get('/user/:userId/profile', userAuthentication,userRegister)
-
+router.post("/login",loginUser)
+router.get("/user/:userId/profile",authentication,authorization,getUserDetails)
+router.put("/user/:userId/profile",authentication,authorization,putUserValidations,putUser)
 
 module.exports=router

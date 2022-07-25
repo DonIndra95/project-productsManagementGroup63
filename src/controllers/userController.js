@@ -1,59 +1,133 @@
-const userModel= require("../models/userModel")
-const aws= require("aws-sdk")
-const bcrypt=require("bcrypt")
-const { uploadFile } = require("../aws/aws")
-const validator = require('../validations/userValidations')
-const userRegister=async (req,res)=>{
-    try {
-        let data= req.register
-        let file=req.files
+const userModel = require("../models/userModel");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const { uploadFile } = require("../aws/aws");
+const { isValid, isValidMail } = require("../validations/userValidations");
 
-        if(file&& file.length>0){
-            let profileImage= await uploadFile(file[0]);
-            if(profileImage.error)return res.status(400).send({status:false,message:profileImage.error})
-            data.profileImage=profileImage;
-          }else return res.status(400).send({status:false,message:"Please upload file"})        
+const userRegister = async (req, res) => {
+  try {
+    let data = req.register;
+    let file = req.files;
 
-        let savedData=await userModel.create(data)
+    if (file && file.length > 0) {
+      let profileImage = await uploadFile(file[0]);
+      if (profileImage.error)
+        return res
+          .status(400)
+          .send({ status: false, message: profileImage.error });
+      data.profileImage = profileImage;
+    } else
+      return res
+        .status(400)
+        .send({ status: false, message: "Please upload file" });
 
-        res.status(201).send({status:true,message:"User created successfully",data:savedData})
-        
-    } catch (err) {
-        return res.status(500).send({status:false,message:err.message})        
-    }
+    let savedData = await userModel.create(data);
 
-}
+    res.status(201).send({
+      status: true,
+      message: "User created successfully",
+      data: savedData,
+    });
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
 
-// =====================================================getApi============================================
+const loginUser = async (req, res) => {
+  try {
+    const email = req.body.email;
+    const password = req.body.password;
+    if (!email || !password)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please Enter email and password" });
+    if (!isValidMail(email))
+      return res
+        .status(400)
+        .send({ status: false, message: "Enter a valid email " });
+
+    if (!isValid(password))
+      return res
+        .status(400)
+        .send({ status: false, message: "Enter a valid password " });
+
+    let checkEmail = await userModel.findOne({ email: email });
+
+    if (!checkEmail)
+      return res
+        .status(404)
+        .send({ status: false, message: "Entered email not found " });
+
+    let checkPassword = bcrypt.compareSync(password, checkEmail.password);
+    if (!checkPassword)
+      return res.status(404).send({ status: false, message: "Wrong password" });
+
+    const token = jwt.sign(
+      {
+        userId: checkEmail._id,
+      },
+      "this is my secret key",
+      { expiresIn: "24h" }
+    );
+    res.setHeader("x-api-key", token);
+    res.status(200).send({
+      status: true,
+      message: "User login successfull",
+      data: { userId: checkEmail._id, token: token },
+    });
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
 const getUserDetails = async function (req, res) {
+  try {
+    const userId = req.params.userId;
+    const findUserDetails = await userModel.findById(userId);
 
-    try {
-
-        const userId = req.params.userId
-        const userIdFromToken = req.userId
-
-
-        if (!validator.isValidObjectId(userId)) {
-            return res.status(400).send({ status: false, message: "Invalid userId" })
-        }
-
-        const findUserDetails = await userModel.findById(userId)
-
-        if (!findUserDetails) {
-            return res.status(404).send({ status: false, message: "User Not Found!!" })
-        }
-
-        if (findUserDetails._id.toString() != userIdFromToken) {
-            return res.status(403).send({ status: false, message: "You Are Not Authorized!!" });
-        }
-
-        return res.status(200).send({ status: true, message: "Profile Fetched Successfully!!", data: findUserDetails })
-
-    } catch (err) {
-
-        return res.status(500).send({ status: false, error: err.message })
-
+    if (!findUserDetails) {
+      return res
+        .status(404)
+        .send({ status: false, message: "User Not Found!!" });
     }
-}
 
-module.exports={userRegister,getUserDetails}
+    res.status(200).send({
+      status: true,
+      message: "User profile details",
+      data: findUserDetails,
+    });
+  } catch (err) {
+    return res.status(500).send({ status: false, error: err.message });
+  }
+};
+
+const putUser = async (req, res) => {
+  try {
+    let userId = req.params.userId;
+    let data = req.register;
+
+    if (Object.keys(data).length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Nothing to update" });
+
+    let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, data, {
+      new: true,
+    });
+
+    if (!updatedUser)
+      return res.status(404).send({ status: false, message: "User not found" });
+
+    res.status(200).send({
+      status: true,
+      message: "User profile updated",
+      data: updatedUser,
+    });
+  } catch (err) {
+    console.log(err);
+
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
+module.exports = { userRegister, loginUser, getUserDetails, putUser };
