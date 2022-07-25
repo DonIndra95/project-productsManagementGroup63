@@ -4,7 +4,7 @@ const { userRegister, putUser, loginUser, getUserDetails } = require("../control
 const { userValidation, putUserValidations } = require("../validations/userValidations")
 const router= express.Router()
 
-//User API
+//User APIs
 
 router.post("/register",userValidation,userRegister)
 router.post("/login",loginUser)
