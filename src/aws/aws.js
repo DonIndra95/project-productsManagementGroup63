@@ -23,15 +23,4 @@ let uploadFile=(file)=>{
   
 
 
-
-
-
-
-
-
-
-
-
-
-
 module.exports={uploadFile}
