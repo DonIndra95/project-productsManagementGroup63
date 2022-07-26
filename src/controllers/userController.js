@@ -1,9 +1,10 @@
-const userModel = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const userModel = require("../models/userModel");
 const { uploadFile } = require("../aws/aws");
 const { isValid, isValidMail } = require("../validations/userValidations");
 
+////////////////////////////////----------------------CREATE USER DETAILS----------------------/////////////////////////////////
 const userRegister = async (req, res) => {
   try {
     let data = req.register;
@@ -32,7 +33,7 @@ const userRegister = async (req, res) => {
     return res.status(500).send({ status: false, message: err.message });
   }
 };
-
+////////////////////////////////----------------------USER LOGIN----------------------/////////////////////////////////
 const loginUser = async (req, res) => {
   try {
     const email = req.body.email;
@@ -44,7 +45,7 @@ const loginUser = async (req, res) => {
     if (!isValidMail(email))
       return res
         .status(400)
-        .send({ status: false, message: "Enter a valid email " });
+        .send({ status: false, message: `'${email}' is not a valid email` });
 
     if (!isValid(password))
       return res
@@ -56,11 +57,11 @@ const loginUser = async (req, res) => {
     if (!checkEmail)
       return res
         .status(404)
-        .send({ status: false, message: "Entered email not found " });
+        .send({ status: false, message: `'${email}' email not found ` });
 
     let checkPassword = bcrypt.compareSync(password, checkEmail.password);
     if (!checkPassword)
-      return res.status(404).send({ status: false, message: "Wrong password" });
+      return res.status(400).send({ status: false, message: "Wrong password" });
 
     const token = jwt.sign(
       {
@@ -79,7 +80,7 @@ const loginUser = async (req, res) => {
     return res.status(500).send({ status: false, message: err.message });
   }
 };
-
+////////////////////////////////----------------------GET USER DETAILS----------------------/////////////////////////////////
 const getUserDetails = async function (req, res) {
   try {
     const userId = req.params.userId;
@@ -100,7 +101,7 @@ const getUserDetails = async function (req, res) {
     return res.status(500).send({ status: false, error: err.message });
   }
 };
-
+////////////////////////////////----------------------UPDATE USER DETAILS----------------------/////////////////////////////////
 const putUser = async (req, res) => {
   try {
     let userId = req.params.userId;
