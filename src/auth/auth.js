@@ -5,12 +5,13 @@ const userModel = require("../models/userModel");
 const authentication = async function (req, res, next) {
   try {
     let bearerToken = req.headers["authorization"];
-   // console.log(bearerToken)
+   console.log(bearerToken)
     var token=null;
 
     if(typeof bearerToken!== "undefined"){
 
         let bearer=bearerToken.split(" ")
+        console.log(bearer)
         token=bearer[1]
     }
 
@@ -22,8 +23,7 @@ const authentication = async function (req, res, next) {
     jwt.verify(token, "this is my secret key",function (err, decoded) {
         if (err) {
           let msg =
-            err.message === "jwt expired"
-              ? "token is expired": "token is invalid";
+            err.message === "jwt expired" ? "token is expired": "token is invalid";
 
           return res.status(401).send({ status: false, message: msg });
         

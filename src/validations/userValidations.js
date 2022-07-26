@@ -16,7 +16,11 @@ const isValidFname = function (name) {
 };
 
 const isValidLname = function (name) {
-  return /^[a-zA-Z]{2,30}$/.test(name);
+  return /^[a-zA-Z ]{2,30}$/.test(name);
+};
+
+const isValidStreet = function (value) {
+  return /^[a-zA-Z0-9 -.]{2,30}$/.test(value);
 };
 
 // function for validating input request
@@ -50,7 +54,7 @@ const isValidPassword = function (pass) {
 //function for object validation
 const isValidObject = function (object) {
   if (typeof object === "undefined" || object === null) return false;
-  if (!object || object.length == 0) return false;
+  // if (!object || object.length == 0) return false;
   if (typeof object != "object") return false;
   return isValidRequest(object);
 };
@@ -182,6 +186,12 @@ const userValidation = async (req, res, next) => {
         .status(400)
         .send({ status: false, message: "Please enter billing street" });
 
+    if (!isValidStreet(req.body.address.billing.street))
+      return res.status(400).send({
+        status: false,
+        message: "Please enter a valid billing street",
+      });
+
     if (!isValid(req.body.address.shipping.pincode))
       return res
         .status(400)
@@ -208,6 +218,11 @@ const userValidation = async (req, res, next) => {
         .status(400)
         .send({ status: false, message: "Please enter shipping street" });
 
+    if (!isValidStreet(req.body.address.shipping.street))
+      return res.status(400).send({
+        status: false,
+        message: "Please enter a valid shipping street",
+      });
     if (
       req.body.address.shipping.city != req.body.address.billing.city &&
       req.body.address.shipping.pincode == req.body.address.billing.pincode
@@ -267,13 +282,15 @@ const putUserValidations = async (req, res, next) => {
     let { fname, lname, email, phone, password } = req.body;
 
     let data = {};
+    console.log(fname);
+    console.log(typeof fname);
 
-    if(fname?.length==0)
-    return res
-          .status(400)
-          .send({ status: false, message: "Please enter fname" });
+    if (fname?.length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter a fname" });
 
-    if(fname){
+    if (fname) {
       if (!isValid(fname))
         return res
           .status(400)
@@ -285,10 +302,10 @@ const putUserValidations = async (req, res, next) => {
           .send({ status: false, message: "Please enter valid fname" });
       data.fname = fname;
     }
-    if(lname?.length==0)
-    return res
-          .status(400)
-          .send({ status: false, message: "Please enter lname" });
+    if (lname?.length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter lname" });
 
     if (lname) {
       if (!isValid(lname))
@@ -303,10 +320,10 @@ const putUserValidations = async (req, res, next) => {
       data.lname = lname;
     }
 
-    if(email?.length==0)
-    return res
-          .status(400)
-          .send({ status: false, message: "Please enter email" });
+    if (email?.length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter email" });
 
     if (email) {
       if (!isValid(email))
@@ -321,10 +338,10 @@ const putUserValidations = async (req, res, next) => {
       data.email = email;
     }
 
-    if(phone?.length==0)
-    return res
-          .status(400)
-          .send({ status: false, message: "Please enter phone number" });
+    if (phone?.length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter phone number" });
 
     if (phone) {
       if (!isValid(phone))
@@ -340,10 +357,10 @@ const putUserValidations = async (req, res, next) => {
       data.phone = phone;
     }
 
-    if(password?.length==0)
-    return res
-          .status(400)
-          .send({ status: false, message: "Please enter password" });
+    if (password?.length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter password" });
 
     if (password) {
       if (!isValid(password))
@@ -387,12 +404,10 @@ const putUserValidations = async (req, res, next) => {
 
     if (req.body.address) {
       if (!isValidObject(req.body.address)) {
-        return res
-          .status(400)
-          .send({
-            status: false,
-            message: "Please enter address as a valid object",
-          });
+        return res.status(400).send({
+          status: false,
+          message: "Please enter address as a valid object",
+        });
       }
       if (
         Object.hasOwn(req.body.address, "shipping") ||
@@ -405,20 +420,16 @@ const putUserValidations = async (req, res, next) => {
             Object.hasOwn(req.body.address.shipping, "pincode")
           ) {
             if (!isValidObject(req.body.address.shipping))
-              return res
-                .status(400)
-                .send({
-                  status: false,
-                  message: "Please enter shipping address as a valid object",
-                });
+              return res.status(400).send({
+                status: false,
+                message: "Please enter shipping address as a valid object",
+              });
 
             if (req.body.address.shipping.pincode?.length == 0)
-              return res
-                .status(400)
-                .send({
-                  status: false,
-                  message: "Please enter shipping pincode",
-                });
+              return res.status(400).send({
+                status: false,
+                message: "Please enter shipping pincode",
+              });
 
             if (req.body.address.shipping.pincode) {
               let shippingPincode = req.body.address.shipping.pincode;
@@ -444,12 +455,10 @@ const putUserValidations = async (req, res, next) => {
             if (req.body.address.shipping.city) {
               let shippingCity = req.body.address.shipping.city;
               if (!isValid(shippingCity))
-                return res
-                  .status(400)
-                  .send({
-                    status: false,
-                    message: "Please enter shipping city",
-                  });
+                return res.status(400).send({
+                  status: false,
+                  message: "Please enter shipping city",
+                });
 
               if (!isValidLname(shippingCity))
                 return res.status(400).send({
@@ -460,32 +469,31 @@ const putUserValidations = async (req, res, next) => {
             }
 
             if (req.body.address.shipping.street?.length == 0)
-              return res
-                .status(400)
-                .send({
-                  status: false,
-                  message: "Please enter shipping street",
-                });
+              return res.status(400).send({
+                status: false,
+                message: "Please enter shipping street",
+              });
 
             if (req.body.address.shipping.street) {
               let shippingStreet = req.body.address.shipping.street;
               if (!isValid(shippingStreet))
-                return res
-                  .status(400)
-                  .send({
-                    status: false,
-                    message: "Please enter shipping street",
-                  });
+                return res.status(400).send({
+                  status: false,
+                  message: "Please enter shipping street",
+                });
+              if (!isValidStreet(req.body.address.shipping.street))
+                return res.status(400).send({
+                  status: false,
+                  message: "Please enter a valid shipping street",
+                });
               data["address.shipping.street"] = shippingStreet;
             }
           } else
-            return res
-              .status(400)
-              .send({
-                status: false,
-                message:
-                  "Please enter shipping street or shipping city or shipping pincode",
-              });
+            return res.status(400).send({
+              status: false,
+              message:
+                "Please enter shipping street or shipping city or shipping pincode",
+            });
         }
 
         if (req.body.address.billing) {
@@ -495,28 +503,25 @@ const putUserValidations = async (req, res, next) => {
             Object.hasOwn(req.body.address.billing, "pincode")
           ) {
             if (!isValidObject(req.body.address.billing)) {
-              return res
-                .status(400)
-                .send({
-                  status: false,
-                  message: "Please enter billing address as a valid object",
-                });
+              return res.status(400).send({
+                status: false,
+                message: "Please enter billing address as a valid object",
+              });
             }
 
-            if(req.body.address.billing.pincode?.length==0)
-          return res
-              .status(400)
-              .send({ status: false, message: "Please enter billing pincode" });
+            if (req.body.address.billing.pincode?.length == 0)
+              return res.status(400).send({
+                status: false,
+                message: "Please enter billing pincode",
+              });
 
             if (req.body.address.billing.pincode) {
               let billingPincode = req.body.address.billing.pincode;
               if (!isValid(billingPincode))
-                return res
-                  .status(400)
-                  .send({
-                    status: false,
-                    message: "Please enter billing pincode",
-                  });
+                return res.status(400).send({
+                  status: false,
+                  message: "Please enter billing pincode",
+                });
 
               if (!isValidPincode(billingPincode))
                 return res.status(400).send({
@@ -526,20 +531,18 @@ const putUserValidations = async (req, res, next) => {
               data["address.billing.pincode"] = billingPincode;
             }
 
-            if(req.body.address.billing.city?.length==0)
-          return res
-              .status(400)
-              .send({ status: false, message: "Please enter billing city" });
+            if (req.body.address.billing.city?.length == 0)
+              return res
+                .status(400)
+                .send({ status: false, message: "Please enter billing city" });
 
             if (req.body.address.billing.city) {
               let billingCity = req.body.address.billing.city;
               if (!isValid(billingCity))
-                return res
-                  .status(400)
-                  .send({
-                    status: false,
-                    message: "Please enter billing city",
-                  });
+                return res.status(400).send({
+                  status: false,
+                  message: "Please enter billing city",
+                });
 
               if (!isValidLname(billingCity))
                 return res.status(400).send({
@@ -550,38 +553,40 @@ const putUserValidations = async (req, res, next) => {
               data["address.billing.city"] = billingCity;
             }
 
-            if(req.body.address.billing.street?.length==0)
-          return res
-              .status(400)
-              .send({ status: false, message: "Please enter billing street" });
+            if (req.body.address.billing.street?.length == 0)
+              return res.status(400).send({
+                status: false,
+                message: "Please enter billing street",
+              });
 
             if (req.body.address.billing.street) {
               let billingStreet = req.body.address.billing.street;
               if (!isValid(billingStreet))
+                return res.status(400).send({
+                  status: false,
+                  message: "Please enter billing street",
+                });
+              if (!isValidStreet(req.body.address.billing.street))
                 return res
                   .status(400)
                   .send({
                     status: false,
-                    message: "Please enter billing street",
+                    message: "Please enter a valid billing street",
                   });
               data["address.billing.street"] = billingStreet;
             }
           } else
-            return res
-              .status(400)
-              .send({
-                status: false,
-                message:
-                  "Please enter billing street or billing city or billing pincode",
-              });
+            return res.status(400).send({
+              status: false,
+              message:
+                "Please enter billing street or billing city or billing pincode",
+            });
         }
       } else
-        return res
-          .status(400)
-          .send({
-            status: false,
-            message: "Please enter shipping or billing address",
-          });
+        return res.status(400).send({
+          status: false,
+          message: "Please enter shipping or billing address",
+        });
     }
 
     // if ((data["address.shipping.pincode"] == data["address.billing.pincode"])&&(data["address.shipping.city"] != data["address.billing.city"]))

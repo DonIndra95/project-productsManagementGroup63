@@ -70,7 +70,7 @@ const loginUser = async (req, res) => {
       "this is my secret key",
       { expiresIn: "24h" }
     );
-    res.setHeader("x-api-key", token);
+    
     res.status(200).send({
       status: true,
       message: "User login successfull",
