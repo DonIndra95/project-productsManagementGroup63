@@ -5,13 +5,11 @@ const userModel = require("../models/userModel");
 const authentication = async function (req, res, next) {
   try {
     let bearerToken = req.headers["authorization"];
-   console.log(bearerToken)
     var token=null;
 
     if(typeof bearerToken!== "undefined"){
 
         let bearer=bearerToken.split(" ")
-        console.log(bearer)
         token=bearer[1]
     }
 

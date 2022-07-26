@@ -110,7 +110,7 @@ const putUser = async (req, res) => {
     if (Object.keys(data).length == 0)
       return res
         .status(400)
-        .send({ status: false, message: "Nothing to update" });
+        .send({ status: false, message: "Nothing to update,Kindly check your input" });
 
     let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, data, {
       new: true,

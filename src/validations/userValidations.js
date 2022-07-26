@@ -1,10 +1,10 @@
 const bcrypt = require("bcrypt");
 const userModel = require("../models/userModel");
 const { uploadFile } = require("../aws/aws");
+const { findById } = require("../models/userModel");
 
 // function for string verification
 const isValid = function (value) {
-  if (value?.length == 0) return false;
   if (typeof value == "undefined" || value == null) return false;
   if (typeof value == "string" && value.trim().length == 0) return false;
   else if (typeof value == "string") return true;
@@ -54,7 +54,6 @@ const isValidPassword = function (pass) {
 //function for object validation
 const isValidObject = function (object) {
   if (typeof object === "undefined" || object === null) return false;
-  // if (!object || object.length == 0) return false;
   if (typeof object != "object") return false;
   return isValidRequest(object);
 };
@@ -142,23 +141,23 @@ const userValidation = async (req, res, next) => {
         .status(400)
         .send({ status: false, message: "Image should be in required format" });
 
-    if (!isValidObject(req.body.address)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter address" });
-    }
+    // if (!isValidObject(req.body.address)) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, message: "Please enter address" });
+    // }
 
-    if (!isValidObject(req.body.address.shipping)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter shipping address" });
-    }
+    // if (!isValidObject(req.body.address.shipping)) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, message: "Please enter shipping address" });
+    // }
 
-    if (!isValidObject(req.body.address.billing)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter billing address" });
-    }
+    // if (!isValidObject(req.body.address.billing)) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, message: "Please enter billing address" });
+    // }
 
     if (!isValid(req.body.address.billing.pincode))
       return res
@@ -274,7 +273,7 @@ const userValidation = async (req, res, next) => {
 /////////////////////////////////---------------------UPDATE USER VALIDATIONS------------------------///////////////////////////////
 const putUserValidations = async (req, res, next) => {
   try {
-    if (!isValidRequest(req.body))
+    if (!isValidRequest(req.body) && !req.files)
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid input" });
@@ -282,8 +281,6 @@ const putUserValidations = async (req, res, next) => {
     let { fname, lname, email, phone, password } = req.body;
 
     let data = {};
-    console.log(fname);
-    console.log(typeof fname);
 
     if (fname?.length == 0)
       return res
@@ -401,6 +398,11 @@ const putUserValidations = async (req, res, next) => {
           .send({ status: false, message: profileImage.error });
       data.profileImage = profileImage;
     }
+    if (req.body.address?.length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Please enter address as a valid object",
+      });
 
     if (req.body.address) {
       if (!isValidObject(req.body.address)) {
@@ -409,6 +411,19 @@ const putUserValidations = async (req, res, next) => {
           message: "Please enter address as a valid object",
         });
       }
+
+      if (req.body.address.shipping?.length == 0)
+        return res.status(400).send({
+          status: false,
+          message: "Please enter shipping address as a valid object",
+        });
+
+      if (req.body.address.billing?.length == 0)
+        return res.status(400).send({
+          status: false,
+          message: "Please enter billing address as a valid object",
+        });
+
       if (
         Object.hasOwn(req.body.address, "shipping") ||
         Object.hasOwn(req.body.address, "billing")
@@ -567,12 +582,10 @@ const putUserValidations = async (req, res, next) => {
                   message: "Please enter billing street",
                 });
               if (!isValidStreet(req.body.address.billing.street))
-                return res
-                  .status(400)
-                  .send({
-                    status: false,
-                    message: "Please enter a valid billing street",
-                  });
+                return res.status(400).send({
+                  status: false,
+                  message: "Please enter a valid billing street",
+                });
               data["address.billing.street"] = billingStreet;
             }
           } else
@@ -589,12 +602,28 @@ const putUserValidations = async (req, res, next) => {
         });
     }
 
-    // if ((data["address.shipping.pincode"] == data["address.billing.pincode"])&&(data["address.shipping.city"] != data["address.billing.city"]))
-    //   return res.status(400).send({
-    //     status: false,
-    //     message: "Pincode is different for different cities",
-    //   });
+    // if (
+    //   data["address.shipping.pincode"] ||
+    //   data["address.billing.pincode"] ||
+    //   data["address.shipping.city"] ||
+    //   data["address.billing.city"]
+    // ) {
+    //   let checkUser = await userModel.findById(req.params.userId);
+    //   console.log(checkUser)
 
+    //   if (
+    //     (data["address.shipping.pincode"] ==
+    //       checkUser.address.billing.pincode ||
+    //       data["address.billing.pincode"] ==
+    //         checkUser.address.shipping.pincode) &&
+    //     (data["address.shipping.city"] != checkUser.address.billing.city ||
+    //       data["address.billing.city"] != checkUser.address.shipping.city)
+    //   )
+    //     return res.status(400).send({
+    //       status: false,
+    //       message: "Pincode is different for different cities",
+    //     });
+    // }
     if (data.phone || data.email) {
       let unique = await userModel.findOne({
         $or: [{ email: email }, { phone: phone }],
