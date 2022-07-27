@@ -2,6 +2,7 @@ const express= require("express")
 const { authentication, authorization } = require("../auth/auth")
 const { createProduct, getProducts, getProductDetails, updateProduct, deleteProduct } = require("../controllers/productController")
 const { userRegister, putUser, loginUser, getUserDetails } = require("../controllers/userController")
+const { createProductValidations } = require("../validations/productValidations")
 const { userValidation, putUserValidations } = require("../validations/userValidations")
 const router= express.Router()
 
@@ -14,7 +15,7 @@ router.put("/user/:userId/profile",authentication,authorization,putUserValidatio
 
 //Product APIs
 
-router.post("/products",createProduct)
+router.post("/products",createProductValidations,createProduct)
 router.get("/products",getProducts)
 router.get("/products/:productId",getProductDetails)
 router.put("/products/:productId",updateProduct)

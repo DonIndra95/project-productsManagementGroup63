@@ -644,4 +644,4 @@ const putUserValidations = async (req, res, next) => {
   }
 };
 
-module.exports = { userValidation, putUserValidations, isValid, isValidMail };
+module.exports = { userValidation, putUserValidations, isValid, isValidMail,isValidRequest,isValidFname };
