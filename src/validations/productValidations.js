@@ -1,6 +1,6 @@
 const productModel = require("../models/productModel");
 
-const { isValidRequest, isValid, isValidFname } = require("./userValidations");
+const { isValidRequest, isValid } = require("./userValidations");
 
 //function for valid title
 const isValidTitle = (value) => {
@@ -16,11 +16,11 @@ const removeSpaces = (value) => {
 };
 
 //function to checkprice
-const isValidPrice = (value) => {
-  if (typeof value == "undefined" || value == null) return false;
-  if (typeof value !== "number") return false;
-  return true;
-};
+// const isValidPrice = (value) => {
+//   if (typeof value == "undefined" || value == null) return false;
+//   if (typeof value !== "number") return false;
+//   return true;
+// };
 
 //function for checkstyle
 const isValidStyle = (value) => {

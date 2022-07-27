@@ -2,7 +2,7 @@ const { isValidObjectId } = require("mongoose");
 const { uploadFile } = require("../aws/aws");
 const productModel = require("../models/productModel");
 const { isValidTitle } = require("../validations/productValidations");
-const { isValidRequest, isValid } = require("../validations/userValidations");
+const { isValid } = require("../validations/userValidations");
 
 const createProduct = async (req, res) => {
   try {
