@@ -185,16 +185,16 @@ Send [form-data](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
 - Product Model
 ```yaml
 { 
-  title: {string, mandatory, unique},
-  description: {string, mandatory},
-  price: {number, mandatory, valid number/decimal},
-  currencyId: {string, mandatory, INR},
-  currencyFormat: {string, mandatory, Rupee symbol},
-  isFreeShipping: {boolean, default: false},
-  productImage: {string, mandatory},  // s3 link
-  style: {string},
-  availableSizes: {array of string, at least one size, enum["S", "XS","M","X", "L","XXL", "XL"]},
-  installments: {number},
+  title: {string, mandatory, unique},//body
+  description: {string, mandatory},//body
+  price: {number, mandatory, valid number/decimal},//body
+  currencyId: {string, mandatory, INR},//code
+  currencyFormat: {string, mandatory, Rupee symbol},//code
+  isFreeShipping: {boolean, default: false},//body
+  productImage: {string, mandatory},  // s3 link //code
+  style: {string},//body
+  availableSizes: {array of string, at least one size, enum["S", "XS","M","X", "L","XXL", "XL"]},//body
+  installments: {number},//body
   deletedAt: {Date, when the document is deleted}, 
   isDeleted: {boolean, default: false},
   createdAt: {timestamp},

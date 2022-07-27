@@ -20,4 +20,10 @@ router.get("/products/:productId",getProductDetails)
 router.put("/products/:productId",updateProduct)
 router.delete("/products/:productId",deleteProduct)
 
+
+
+router.all("/*",(req,res)=>{
+    res.status(400).send("Not found")
+})
+
 module.exports=router
