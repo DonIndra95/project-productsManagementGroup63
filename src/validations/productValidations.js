@@ -60,6 +60,7 @@ const createProductValidations = async (req, res, next) => {
       availableSizes,
       installments,
       isDeleted,
+      isFreeShipping,
     } = req.body;
 
     let data = {};
@@ -166,6 +167,21 @@ const createProductValidations = async (req, res, next) => {
         status: false,
         message: "Cannot delete during creation",
       });
+
+    if(isFreeShipping?.length==0)
+    return res.status(400).send({
+      status: false,
+      message: "Please enter isFreeShipping value",
+    });
+
+    if(isFreeShipping){
+      if(typeof isFreeShipping!= "true"||isFreeShipping!=="false"||isFreeShipping==null)
+      return res.status(400).send({
+        status: false,
+        message: "isFreeShipping can either be true or false",
+      });
+      data.isFreeShipping=isFreeShipping
+    }
 
     let file = req.files;
 
