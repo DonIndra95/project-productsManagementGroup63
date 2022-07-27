@@ -27,6 +27,24 @@ const isValidStyle = (value) => {
   return /^[a-zA-Z0-9 .-]{2,30}$/.test(value);
 };
 
+// function for array value verification
+const checkValue = function (value) {
+  let arrValue = [];
+  value.map((x) => {
+    if (x.trim().length) arrValue.push(x);
+  });
+  return arrValue.length ? arrValue : false;
+};
+
+// function for converting string into array
+const convertToArray = function (value) {
+  if (typeof value === "string" && value) {
+    if (value.trim().length == 0) return false;
+    return value.split(",").filter((x) => x);
+  } else if (value?.length > 0) return checkValue(value);
+  return false;
+};
+
 const createProductValidations = async (req, res, next) => {
   try {
     if (!isValidRequest(req.body))
@@ -103,19 +121,24 @@ const createProductValidations = async (req, res, next) => {
 
     let allowedSizes = ["S", "XS", "M", "X", "L", "XXL", "XL"];
 
-    if (!isValid(availableSizes))
+    sizes = convertToArray(availableSizes);
+
+    if (!sizes)
       return res
         .status(400)
-        .send({ status: false, message: "Please enter a available size" });
+        .send({ status: false, message: "Please enter atleast one size" });
 
-    availableSizes = availableSizes.toUpperCase();
+    let check = true;
+    sizes.map((e) => {
+      if (!allowedSizes.includes(e)) return (check = false);
+    });
 
-    if (!allowedSizes.includes(availableSizes))
+    if (!check)
       return res.status(400).send({
         status: false,
         message: "Sizes can only be S, XS, M, X, L, XL, XXL",
       });
-    data.availableSizes = availableSizes;
+    data.availableSizes = sizes;
 
     if (installments?.length == 0)
       return res
@@ -182,4 +205,4 @@ const createProductValidations = async (req, res, next) => {
   }
 };
 
-module.exports = { createProductValidations ,isValidTitle};
+module.exports = { createProductValidations, isValidTitle };

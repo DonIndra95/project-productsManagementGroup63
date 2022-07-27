@@ -10,7 +10,7 @@ const createProduct = async (req, res) => {
 
     let file = req.files;
 
-    data.currencyId = "INR"; //ASK TA
+    data.currencyId = "INR";
     data.currencyFormat = "₹";
 
     if (file && file.length > 0) {
