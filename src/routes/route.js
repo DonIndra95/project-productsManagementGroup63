@@ -2,7 +2,7 @@ const express= require("express")
 const { authentication, authorization } = require("../auth/auth")
 const { createProduct, getProducts, getProductDetails, updateProduct, deleteProduct } = require("../controllers/productController")
 const { userRegister, putUser, loginUser, getUserDetails } = require("../controllers/userController")
-const { createProductValidations } = require("../validations/productValidations")
+const { createProductValidations, updateProductValidations } = require("../validations/productValidations")
 const { userValidation, putUserValidations } = require("../validations/userValidations")
 const router= express.Router()
 
@@ -18,13 +18,13 @@ router.put("/user/:userId/profile",authentication,authorization,putUserValidatio
 router.post("/products",createProductValidations,createProduct)
 router.get("/products",getProducts)
 router.get("/products/:productId",getProductDetails)
-router.put("/products/:productId",updateProduct)
+router.put("/products/:productId",updateProductValidations,updateProduct)
 router.delete("/products/:productId",deleteProduct)
 
 
 
 router.all("/*",(req,res)=>{
-    res.status(400).send("Not found")
+    res.status(400).send("Invalid HTTP request")
 })
 
 module.exports=router

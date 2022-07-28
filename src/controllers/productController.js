@@ -10,7 +10,7 @@ const createProduct = async (req, res) => {
 
     let file = req.files;
 
-    data.currencyId = "INR";
+    data.currencyId = "INR"; //ASK TA
     data.currencyFormat = "₹";
 
     if (file && file.length > 0) {
@@ -41,10 +41,64 @@ const getProducts = async (req, res) => {
   try {
     let query = req.query;
 
+    if (query) {
+      let keys = Object.keys(query);
+
+      let validKeys = [
+        "priceGreaterThan",
+        "size",
+        "priceLessThan",
+        "priceSort",
+        "name"
+      ];
+
+      let check = true;
+      keys.map((e) => {
+        if (!validKeys.includes(e)) return (check = false);
+      });
+
+      if (!check)
+        return res.status(400).send({
+          status: false,
+          message: "Please enter valid query params",
+        });
+    }
+
+    if(query.name?.length==0)
+    return res.status(400).send({
+      status: false,
+      message: "Please enter a valid title name"
+    });
+
+    if(query.priceGreaterThan?.length==0)
+    return res.status(400).send({
+      status: false,
+      message: "Please enter priceGreaterThan value"
+    });
+
+    if(query.priceLessThan?.length==0)
+    return res.status(400).send({
+      status: false,
+      message: "Please enter priceLessThan value"
+    });
+
+    if(query.size?.length==0)
+    return res.status(400).send({
+      status: false,
+      message: "Please enter size value"
+    });
+
+    if(query.priceSort?.length==0)
+    return res.status(400).send({
+      status: false,
+      message: "Please enter priceSort value"
+    });
+
     const product = { isDeleted: false };
 
     if (query.size) {
       let allowedSizes = ["S", "XS", "M", "X", "L", "XXL", "XL"];
+
       if (!isValid(query.size))
         return res
           .status(400)
@@ -52,19 +106,36 @@ const getProducts = async (req, res) => {
 
       query.size = query.size.toUpperCase();
 
-      if (!allowedSizes.includes(query.size))
+      let check = true;
+      let sizes = query.size
+        .trim()
+        .split(",")
+        .map((e) => e.trim());
+
+      sizes.map((e) => {
+        if (!allowedSizes.includes(e)) return (check = false);
+      });
+      if (!check)
         return res.status(400).send({
           status: false,
           message: "Sizes can only be S, XS, M, X, L, XL, XXL",
         });
-      product.availableSizes = query.size;
+
+      product.availableSizes = { $in: sizes };
     }
 
     if (query.name) {
+
+      if(!isValid(query.name))
+      return res.status(400).send({
+        status: false,
+        message: "Please enter a valid title name",
+      });
+
       if (!isValidTitle(query.name))
         return res.status(400).send({
           status: false,
-          message: "Please enter a valid title",
+          message: "Please enter a valid title name",
         });
       product.title = query.name;
     }
@@ -88,13 +159,21 @@ const getProducts = async (req, res) => {
     if (query.priceGreaterThan && query.priceLessThan)
       product.price = { $lt: query.priceLessThan, $gt: query.priceGreaterThan };
 
+    if (query.priceSort) {
+      if (query.priceSort != "1" && query.priceSort != "-1")
+        return res.status(400).send({
+          status: false,
+          message: "Please enter priceSort value as 1 or -1",
+        });
+    }
+
     const getProductDetails = await productModel
       .find(product)
       .sort({ price: query.priceSort });
 
     if (getProductDetails.length == 0)
       return res
-        .status(400)
+        .status(404)
         .send({ status: false, message: "No products found" });
 
     res.status(200).send({ status: true, message: getProductDetails });
@@ -130,7 +209,13 @@ const getProductDetails = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    let data = req.body;
+    let data = req.productUpdate;
+    if (Object.keys(req.productUpdate).length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Nothing to update ,please check your inputs",
+      });
+
     let productId = req.params.productId;
     let productUpdate = await productModel.findOneAndUpdate(
       { _id: productId, isDeleted: false },
@@ -146,6 +231,7 @@ const updateProduct = async (req, res) => {
       .status(201)
       .send({ status: true, message: "Success", data: productUpdate });
   } catch (err) {
+    console.log(err);
     return res.status(500).send({ status: false, message: err.message });
   }
 };
@@ -160,25 +246,22 @@ const deleteProduct = async (req, res) => {
         message: "ProductId is not a valid ObjectId",
       });
 
-    let product = await productModel.findOne({
-      _id: productId,
-      isDeleted: false,
-    });
-    if (!product)
+    let deleteProduct = await productModel.findOneAndUpdate(
+      { _id: productId, isDeleted: false },
+      { $set: { isDeleted: true, deletedAt: new Date() } },
+      { new: true }
+    );
+    if (!deleteProduct)
       return res.status(404).send({
         status: false,
         message: "No products found or product has been deleted",
       });
 
-    let deleteProduct = await productModel.findOneAndUpdate(
-      { _id: productId },
-      { $set: { isDeleted: true, deletedAt: new Date() } },
-      { new: true }
-    );
     res
       .status(200)
       .send({ status: true, message: "Success", data: deleteProduct });
   } catch (err) {
+    console.log(err);
     return res.status(500).send({ status: false, message: err.message });
   }
 };

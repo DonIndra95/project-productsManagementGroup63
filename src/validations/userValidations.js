@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const userModel = require("../models/userModel");
 const { uploadFile } = require("../aws/aws");
-const { findById } = require("../models/userModel");
 
 // function for string verification
 const isValid = function (value) {
@@ -602,28 +601,33 @@ const putUserValidations = async (req, res, next) => {
         });
     }
 
-    // if (
-    //   data["address.shipping.pincode"] ||
-    //   data["address.billing.pincode"] ||
-    //   data["address.shipping.city"] ||
-    //   data["address.billing.city"]
-    // ) {
-    //   let checkUser = await userModel.findById(req.params.userId);
-    //   console.log(checkUser)
+  //   "if pincode is same then city should be same also"
+  //   "if pincode is different then city can be same"///cross
+  //   "if city is different then pincode should be different"
 
-    //   if (
-    //     (data["address.shipping.pincode"] ==
-    //       checkUser.address.billing.pincode ||
-    //       data["address.billing.pincode"] ==
-    //         checkUser.address.shipping.pincode) &&
-    //     (data["address.shipping.city"] != checkUser.address.billing.city ||
-    //       data["address.billing.city"] != checkUser.address.shipping.city)
-    //   )
-    //     return res.status(400).send({
-    //       status: false,
-    //       message: "Pincode is different for different cities",
-    //     });
-    // }
+  //   if (
+  //     data["address.shipping.pincode"] ||
+  //     data["address.billing.pincode"] ||
+  //     data["address.shipping.city"] ||
+  //     data["address.billing.city"]
+  //   ) {
+  //     let checkUser = await userModel.findById(req.params.userId);
+  //     console.log(checkUser)
+
+  //     if(data["address.shipping.pincode"]||data["address.billing.pincode"]){
+  //       if((data["address.shipping.pincode"]==checkUser.billing.pincode)||(data["address.billing.pincode"]==checkUser.shipping.pincode)){
+  //         if(checkUser.address.shipping.city!=checkUser.address.billing.city)
+  //         return res.send(" pincode error")
+  //       }
+  //     }
+  //     if(data["address.shipping.city"]||data["address.billing.city"]){
+  //       if((data["address.shipping.city"]==checkUser.address.billing.city)||(data["address.billing.city"]==checkUser.address.shipping.city)){
+  //         if(checkUser.address.shipping.pincode!=checkUser.address.billing.pincode)
+  //         return res.send(" city error")
+  //       }      
+  //   }
+  // }
+
     if (data.phone || data.email) {
       let unique = await userModel.findOne({
         $or: [{ email: email }, { phone: phone }],

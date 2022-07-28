@@ -41,11 +41,11 @@ const authorization = async function (req, res, next) {
     let userId = req.params.userId;
 
     if (!mongoose.isValidObjectId(userId))
-      return res.status(404).send({ status: false, message: "Not a valid userId" });
+      return res.status(400).send({ status: false, message: "Not a valid userId" });
 
     let userDetail = await userModel.findById(userId);
     if (!userDetail)
-      return res.status(404).send({ staus: false, message: "No such userId" });
+      return res.status(404).send({ status: false, message: "No such userId" });
 
     if (userId != req.decodeToken.userId)
       return res
