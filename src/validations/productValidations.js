@@ -370,7 +370,7 @@ const updateProductValidations = async (req, res, next) => {
           status: false,
           message: "Sizes can only be S, XS, M, X, L, XL, XXL",
         });
-      update["$addToSet"] = { availableSizes: { $each: sizes } };
+      update["$addToSet"] = { "availableSizes": { $each: sizes } };
     }
 
     if (Object.hasOwn(req.body, "installments")) {
