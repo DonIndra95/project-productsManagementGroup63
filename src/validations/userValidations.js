@@ -601,32 +601,32 @@ const putUserValidations = async (req, res, next) => {
         });
     }
 
-  //   "if pincode is same then city should be same also"
-  //   "if pincode is different then city can be same"///cross
-  //   "if city is different then pincode should be different"
+    //   "if pincode is same then city should be same also"
+    //   "if pincode is different then city can be same"///cross
+    //   "if city is different then pincode should be different"
 
-  //   if (
-  //     data["address.shipping.pincode"] ||
-  //     data["address.billing.pincode"] ||
-  //     data["address.shipping.city"] ||
-  //     data["address.billing.city"]
-  //   ) {
-  //     let checkUser = await userModel.findById(req.params.userId);
-  //     console.log(checkUser)
+    //   if (
+    //     data["address.shipping.pincode"] ||
+    //     data["address.billing.pincode"] ||
+    //     data["address.shipping.city"] ||
+    //     data["address.billing.city"]
+    //   ) {
+    //     let checkUser = await userModel.findById(req.params.userId);
+    //     console.log(checkUser)
 
-  //     if(data["address.shipping.pincode"]||data["address.billing.pincode"]){
-  //       if((data["address.shipping.pincode"]==checkUser.billing.pincode)||(data["address.billing.pincode"]==checkUser.shipping.pincode)){
-  //         if(checkUser.address.shipping.city!=checkUser.address.billing.city)
-  //         return res.send(" pincode error")
-  //       }
-  //     }
-  //     if(data["address.shipping.city"]||data["address.billing.city"]){
-  //       if((data["address.shipping.city"]==checkUser.address.billing.city)||(data["address.billing.city"]==checkUser.address.shipping.city)){
-  //         if(checkUser.address.shipping.pincode!=checkUser.address.billing.pincode)
-  //         return res.send(" city error")
-  //       }      
-  //   }
-  // }
+    //     if(data["address.shipping.pincode"]||data["address.billing.pincode"]){
+    //       if((data["address.shipping.pincode"]==checkUser.billing.pincode)||(data["address.billing.pincode"]==checkUser.shipping.pincode)){
+    //         if(checkUser.address.shipping.city!=checkUser.address.billing.city)
+    //         return res.send(" pincode error")
+    //       }
+    //     }
+    //     if(data["address.shipping.city"]||data["address.billing.city"]){
+    //       if((data["address.shipping.city"]==checkUser.address.billing.city)||(data["address.billing.city"]==checkUser.address.shipping.city)){
+    //         if(checkUser.address.shipping.pincode!=checkUser.address.billing.pincode)
+    //         return res.send(" city error")
+    //       }
+    //   }
+    // }
 
     if (data.phone || data.email) {
       let unique = await userModel.findOne({
@@ -648,4 +648,11 @@ const putUserValidations = async (req, res, next) => {
   }
 };
 
-module.exports = { userValidation, putUserValidations, isValid, isValidMail,isValidRequest,isValidFname };
+module.exports = {
+  userValidation,
+  putUserValidations,
+  isValid,
+  isValidMail,
+  isValidRequest,
+  isValidFname,
+};

@@ -6,7 +6,7 @@ const { isValidRequest, isValid } = require("./userValidations");
 
 //function for valid title
 const isValidTitle = (value) => {
-  return /^[a-zA-Z0-9 .-]{2,30}$/.test(value);
+  return /^[a-zA-Z0-9 .-]+$/.test(value);
 };
 //function to remoce extra spaces
 const removeSpaces = (value) => {

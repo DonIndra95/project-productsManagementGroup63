@@ -49,7 +49,7 @@ const getProducts = async (req, res) => {
         "size",
         "priceLessThan",
         "priceSort",
-        "name"
+        "name",
       ];
 
       let check = true;
@@ -64,35 +64,35 @@ const getProducts = async (req, res) => {
         });
     }
 
-    if(query.name?.length==0)
-    return res.status(400).send({
-      status: false,
-      message: "Please enter a valid title name"
-    });
+    if (query.name?.length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Please enter a valid title name",
+      });
 
-    if(query.priceGreaterThan?.length==0)
-    return res.status(400).send({
-      status: false,
-      message: "Please enter priceGreaterThan value"
-    });
+    if (query.priceGreaterThan?.length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Please enter priceGreaterThan value",
+      });
 
-    if(query.priceLessThan?.length==0)
-    return res.status(400).send({
-      status: false,
-      message: "Please enter priceLessThan value"
-    });
+    if (query.priceLessThan?.length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Please enter priceLessThan value",
+      });
 
-    if(query.size?.length==0)
-    return res.status(400).send({
-      status: false,
-      message: "Please enter size value"
-    });
+    if (query.size?.length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Please enter size value",
+      });
 
-    if(query.priceSort?.length==0)
-    return res.status(400).send({
-      status: false,
-      message: "Please enter priceSort value"
-    });
+    if (query.priceSort?.length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Please enter priceSort value",
+      });
 
     const product = { isDeleted: false };
 
@@ -125,19 +125,18 @@ const getProducts = async (req, res) => {
     }
 
     if (query.name) {
-
-      if(!isValid(query.name))
-      return res.status(400).send({
-        status: false,
-        message: "Please enter a valid title name",
-      });
+      if (!isValid(query.name))
+        return res.status(400).send({
+          status: false,
+          message: "Please enter a valid title name",
+        });
 
       if (!isValidTitle(query.name))
         return res.status(400).send({
           status: false,
           message: "Please enter a valid title name",
         });
-      product.title = query.name;
+      product.title = {$regex:query.name};
     }
 
     if (query.priceGreaterThan) {

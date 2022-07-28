@@ -108,12 +108,10 @@ const putUser = async (req, res) => {
     let data = req.register;
 
     if (Object.keys(data).length == 0)
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: "Nothing to update,Kindly check your input",
-        });
+      return res.status(400).send({
+        status: false,
+        message: "Nothing to update,Kindly check your input",
+      });
 
     let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, data, {
       new: true,
