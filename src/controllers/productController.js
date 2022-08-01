@@ -4,14 +4,12 @@ const productModel = require("../models/productModel");
 const { isValidTitle } = require("../validations/productValidations");
 const { isValid } = require("../validations/userValidations");
 
+/////////////////////////////////////-----------------CREATE PRODUCT API--------------------//////////////////////////////////////
 const createProduct = async (req, res) => {
   try {
     let data = req.update;
 
     let file = req.files;
-
-    data.currencyId = "INR"; //ASK TA
-    data.currencyFormat = "₹";
 
     if (file && file.length > 0) {
       let productImage = await uploadFile(file[0]);
@@ -37,6 +35,7 @@ const createProduct = async (req, res) => {
   }
 };
 
+/////////////////////////////////////-----------------GET PRODUCT API--------------------//////////////////////////////////////
 const getProducts = async (req, res) => {
   try {
     let query = req.query;
@@ -136,7 +135,7 @@ const getProducts = async (req, res) => {
           status: false,
           message: "Please enter a valid title name",
         });
-      product.title = {$regex:query.name};
+      product.title = { $regex: query.name, $options: "i" };
     }
 
     if (query.priceGreaterThan) {
@@ -181,6 +180,7 @@ const getProducts = async (req, res) => {
   }
 };
 
+/////////////////////////////////////-----------------GET PRODUCT BY ID API--------------------//////////////////////////////////////
 const getProductDetails = async (req, res) => {
   try {
     let productId = req.params.productId;
@@ -206,6 +206,7 @@ const getProductDetails = async (req, res) => {
   }
 };
 
+/////////////////////////////////////-----------------UPDATE PRODUCT API--------------------//////////////////////////////////////
 const updateProduct = async (req, res) => {
   try {
     let data = req.productUpdate;
@@ -235,6 +236,7 @@ const updateProduct = async (req, res) => {
   }
 };
 
+/////////////////////////////////////-----------------DELETE PRODUCT API--------------------//////////////////////////////////////
 const deleteProduct = async (req, res) => {
   try {
     let productId = req.params.productId;

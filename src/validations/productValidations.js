@@ -46,7 +46,7 @@ const convertToArray = function (value) {
   } else if (value?.length > 0) return checkValue(value);
   return false;
 };
-
+///////////////////////////////////-----------------------CREATE PRODUCT VALIDATIONS--------------------//////////////////////////////////////////
 const createProductValidations = async (req, res, next) => {
   try {
     if (!isValidRequest(req.body))
@@ -63,6 +63,8 @@ const createProductValidations = async (req, res, next) => {
       installments,
       isDeleted,
       isFreeShipping,
+      currencyFormat,
+      currencyId
     } = req.body;
 
     let data = {};
@@ -103,6 +105,45 @@ const createProductValidations = async (req, res, next) => {
       });
 
     data.price = Math.round(price * 100) / 100;
+
+    if(!isValid(currencyFormat))
+    return res.status(400).send({
+      status: false,
+      message: "Please enter currencyFormat ",
+    });
+
+    if(currencyFormat!="INR"||currencyFormat!="USD")
+    return res.status(400).send({
+      status: false,
+      message: "Currency format can either be INR or USD",
+    });
+    data.currencyFormat=currencyFormat
+
+    if(!isValid(currencyId))
+    return res.status(400).send({
+      status: false,
+      message: "Please enter currencyId ",
+    });
+
+    if(currencyId!="₹"||currencyId!="$")
+    return res.status(400).send({
+      status: false,
+      message: "currencyId can either be ₹ or $",
+    });
+
+    if(currencyFormat=="INR"&&currencyId!="₹")
+    return res.status(400).send({
+      status: false,
+      message: "currencyId should be ₹ for INR currency format",
+    });
+
+    if(currencyFormat=="USD"&&currencyId!="$")
+    return res.status(400).send({
+      status: false,
+      message: "currencyId should be $ for USD currency format",
+    });
+
+    data.currencyId=currencyId
 
     if (style?.length == 0)
       return res
@@ -223,7 +264,7 @@ const createProductValidations = async (req, res, next) => {
     return res.status(500).send({ status: false, message: err.message });
   }
 };
-
+////////////////////////////-----------------------UPDATE PRODUCT VALIDATIONS--------------------//////////////////////////////////////////
 const updateProductValidations = async (req, res, next) => {
   try {
     if (!isValidRequest(req.body) && !req.files)
