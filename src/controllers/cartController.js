@@ -68,7 +68,7 @@ const createCart = async (req, res) => {
         { _id: cartId },
         update,
         { new: true }
-      );
+      ).populate("items.productId").select({ "items._id": 0, __v: 0 });;
       return res
         .status(200)
         .send({ status: true, message: "Success", data: updatedCart });
@@ -180,7 +180,7 @@ const updateCart = async (req, res) => {
       { _id: cartId },
       update,
       { new: true }
-    );
+    ).populate("items.productId").select({ "items._id": 0, __v: 0 });;
 
     return res
       .status(200)
@@ -199,7 +199,7 @@ const getCart = async (req, res) => {
 
     let validCart = await cartModel
       .findOne({ userId: userId })
-      //.populate("items.productId.poduct")
+      .populate("items.productId")
       .select({ "items._id": 0, __v: 0 });
     if (!validCart)
       return res.status(404).send({ status: false, message: "No cart found" });
