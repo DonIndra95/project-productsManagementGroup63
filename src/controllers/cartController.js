@@ -153,7 +153,7 @@ const updateCart = async (req, res) => {
     }
 
     if (removeProduct == 0 || quantity == 1) {
-      update["$pull"] = { items: { productId: productId } };
+      update["$pull"] = { items: { productId: productId } }; //Used pull to remove an element from an array
 
       for (let i = 0; i < product.length; i++) {
         if (product[i].productId == productId) {
