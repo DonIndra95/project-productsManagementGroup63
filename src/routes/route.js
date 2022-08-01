@@ -1,5 +1,6 @@
 const express = require("express")
 const { authentication, authorization } = require("../auth/auth")
+const { createCart, updateCart, getCart, deleteCart } = require("../controllers/cartController")
 const { createProduct, getProducts, getProductDetails, updateProduct, deleteProduct } = require("../controllers/productController")
 const { userRegister, putUser, loginUser, getUserDetails } = require("../controllers/userController")
 const { createProductValidations, updateProductValidations } = require("../validations/productValidations")
@@ -21,7 +22,12 @@ router.get("/products/:productId", getProductDetails)
 router.put("/products/:productId", updateProductValidations, updateProduct)
 router.delete("/products/:productId", deleteProduct)
 
+//Cart APIs
 
+router.post("/users/:userId/cart",authentication,authorization,createCart)
+router.put("/users/:userId/cart",authentication,authorization,updateCart)
+router.get("/users/:userId/cart",authentication,authorization,getCart)
+router.delete("/users/:userId/cart",authentication,authorization,deleteCart)
 
 router.all("/*", (req, res) => {
     res.status(400).send("Invalid HTTP request")

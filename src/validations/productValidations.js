@@ -64,7 +64,7 @@ const createProductValidations = async (req, res, next) => {
       isDeleted,
       isFreeShipping,
       currencyFormat,
-      currencyId
+      currencyId,
     } = req.body;
 
     let data = {};
@@ -106,44 +106,32 @@ const createProductValidations = async (req, res, next) => {
 
     data.price = Math.round(price * 100) / 100;
 
-    if(!isValid(currencyFormat))
-    return res.status(400).send({
-      status: false,
-      message: "Please enter currencyFormat ",
-    });
+    if (!isValid(currencyFormat))
+      return res.status(400).send({
+        status: false,
+        message: "Please enter currencyFormat ",
+      });
 
-    if(currencyFormat!="INR"||currencyFormat!="USD")
-    return res.status(400).send({
-      status: false,
-      message: "Currency format can either be INR or USD",
-    });
-    data.currencyFormat=currencyFormat
+    if (currencyFormat != "INR")
+      return res.status(400).send({
+        status: false,
+        message: "Currency format should be INR ",
+      });
+    data.currencyFormat = currencyFormat;
 
-    if(!isValid(currencyId))
-    return res.status(400).send({
-      status: false,
-      message: "Please enter currencyId ",
-    });
+    if (!isValid(currencyId))
+      return res.status(400).send({
+        status: false,
+        message: "Please enter currencyId ",
+      });
 
-    if(currencyId!="₹"||currencyId!="$")
-    return res.status(400).send({
-      status: false,
-      message: "currencyId can either be ₹ or $",
-    });
+    if (currencyId != "₹")
+      return res.status(400).send({
+        status: false,
+        message: "currencyId should be ₹",
+      });
 
-    if(currencyFormat=="INR"&&currencyId!="₹")
-    return res.status(400).send({
-      status: false,
-      message: "currencyId should be ₹ for INR currency format",
-    });
-
-    if(currencyFormat=="USD"&&currencyId!="$")
-    return res.status(400).send({
-      status: false,
-      message: "currencyId should be $ for USD currency format",
-    });
-
-    data.currencyId=currencyId
+    data.currencyId = currencyId;
 
     if (style?.length == 0)
       return res
@@ -411,7 +399,7 @@ const updateProductValidations = async (req, res, next) => {
           status: false,
           message: "Sizes can only be S, XS, M, X, L, XL, XXL",
         });
-      update["$addToSet"] = { "availableSizes": { $each: sizes } };
+      update["$addToSet"] = { availableSizes: { $each: sizes } };
     }
 
     if (Object.hasOwn(req.body, "installments")) {
