@@ -33,15 +33,15 @@ const createCart = async (req, res) => {
 
       let checkCartId = await cartModel.findById(cartId);
 
+      if (!checkCartId)
+      return res
+        .status(404)
+        .send({ status: false, message: "cartId not found" });
+
       if (checkCartId.userId != userId)
         return res
           .status(400)
           .send({ status: false, message: "User is not authorized" });
-
-      if (!checkCartId)
-        return res
-          .status(400)
-          .send({ status: false, message: "Please enter valid cartId" });
 
       let update = {};
       let products = checkCartId.items;
@@ -190,8 +190,6 @@ const updateCart = async (req, res) => {
     return res.status(500).send({ status: false, message: err.message });
   }
 };
-
-//populate ??
 
 const getCart = async (req, res) => {
   try {
