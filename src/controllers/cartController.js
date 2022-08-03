@@ -160,7 +160,7 @@ const updateCart = async (req, res) => {
         .status(400)
         .send({ status: false, message: "Please enter valid productId" });
 
-    if (parseInt(removeProduct) != 1 && parseInt(removeProduct) != 0)
+    if (removeProduct!= 1 && removeProduct!= 0)
       return res.status(400).send({
         status: false,
         message: "Please enter valid removeProduct value as 1 or 0",
