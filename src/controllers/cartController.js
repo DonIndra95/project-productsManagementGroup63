@@ -166,12 +166,17 @@ const updateCart = async (req, res) => {
         message: "Please enter valid removeProduct value as 1 or 0",
       });
 
-    let checkCartId = await cartModel.findOne({ userId: userId });
+    let checkCartId = await cartModel.findOne({ userId: userId })//.populate("items.productId");
 
     if (!checkCartId)
       return res
         .status(404)
         .send({ status: false, message: "Cart doesnt exists" });
+
+    if(checkCartId.items.length==0)
+    return res
+        .status(404)
+        .send({ status: false, message: "No items found inside cart" });
 
     if (cartId) {
       if (!isValidObjectId(cartId))
@@ -185,6 +190,8 @@ const updateCart = async (req, res) => {
           message: "User is not authorized to access this cart",
         });
     }
+   
+    //let thisProduct=checkCartId.items.find(e=>e.productId._id==productId)//this find is for array to reduce Db call
 
     let thisProduct = await productModel.findOne({
       _id: productId,
@@ -194,7 +201,7 @@ const updateCart = async (req, res) => {
     if (!thisProduct)
       return res.status(400).send({
         status: false,
-        message: "Product has been deleted or doesnt exists",
+        message: "Product has been deleted or does'nt exists",
       });
 
     let update = {};
