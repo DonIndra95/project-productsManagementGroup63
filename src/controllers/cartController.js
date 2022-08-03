@@ -3,6 +3,7 @@ const cartModel = require("../models/cartModel");
 const productModel = require("../models/productModel");
 const { isValidRequest } = require("../validations/userValidations");
 
+/////////////////////////////////----------------CREATE CART API-----------------------/////////////////////////////////////
 const createCart = async (req, res) => {
   try {
     if (!isValidRequest(req.body))
@@ -30,25 +31,31 @@ const createCart = async (req, res) => {
         message: "Product has been deleted or doesnt exists",
       });
 
-    if(quantity?.length==0)
-    return res.status(400).send({
-      status: false,
-      message: "Please enter number of quantity",
-    });
-
-    if (!/^[1-9]*$/.test(quantity))
+    if (quantity?.length == 0)
       return res.status(400).send({
         status: false,
-        message: "Please enter valid number of quantity(minimum 1)",
+        message: "Please enter number of quantity",
       });
 
-      if (!quantity) quantity = 1;
+    if (quantity) {
+      if (!/^[1-9][0-9]?$/.test(quantity))
+        return res.status(400).send({
+          status: false,
+          message: "Please enter valid number of quantity (minimum 1)",
+        });
+    } else quantity = 1;
 
-      console.log(quantity)
+    console.log(quantity);
 
     let checkCartId = await cartModel.findOne({ userId: userId });
 
     //console.log(checkCartId);
+
+    if (cartId?.length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Please enter cartId",
+      });
 
     if (cartId) {
       if (!isValidObjectId(cartId))
@@ -56,7 +63,7 @@ const createCart = async (req, res) => {
           .status(400)
           .send({ status: false, message: "Please enter valid cartId" });
 
-      if (checkCartId.userId != userId || checkCartId._id != cartId)
+      if (checkCartId._id != cartId)
         return res.status(403).send({
           status: false,
           message: "User is not authorized to access this cart",
@@ -89,7 +96,7 @@ const createCart = async (req, res) => {
           checkCartId.totalPrice + thisProduct.price * quantity;
         update.totalItems = checkCartId.totalItems + 1;
       }
-    // console.log(update);
+      // console.log(update);
       let updatedCart = await cartModel
         .findOneAndUpdate({ userId: userId }, update, { new: true })
         .populate("items.productId", {
@@ -99,7 +106,7 @@ const createCart = async (req, res) => {
           isDeleted: 0,
           deletedAt: 0,
         })
-        .select({ "items._id": 0, __v: 0 ,createdAt:0,updatedAt:0});
+        .select({ "items._id": 0, __v: 0, createdAt: 0, updatedAt: 0 });
       return res
         .status(200)
         .send({ status: true, message: "Success", data: updatedCart });
@@ -112,7 +119,11 @@ const createCart = async (req, res) => {
 
       //let savedData = await cartModel.create(created);
 
-      let data = await cartModel.findOneAndUpdate({userId:userId},created,{new:true,upsert:true})//upsert is used for creating new document if no document is found with this userId
+      let data = await cartModel
+        .findOneAndUpdate({ userId: userId }, created, {
+          new: true,
+          upsert: true,
+        }) //upsert is used for creating new document if no document is found with this userId
         .populate("items.productId", {
           __v: 0,
           createdAt: 0,
@@ -120,7 +131,7 @@ const createCart = async (req, res) => {
           isDeleted: 0,
           deletedAt: 0,
         })
-        .select({ "items._id": 0, __v: 0 ,createdAt:0,updatedAt:0});
+        .select({ "items._id": 0, __v: 0, createdAt: 0, updatedAt: 0 });
 
       return res
         .status(201)
@@ -130,8 +141,9 @@ const createCart = async (req, res) => {
     console.log(err);
     return res.status(500).send({ status: false, message: err.message });
   }
-}
+};
 
+/////////////////////////////////----------------UPDATE CART API-----------------------/////////////////////////////////////
 const updateCart = async (req, res) => {
   try {
     let userId = req.params.userId;
@@ -143,34 +155,36 @@ const updateCart = async (req, res) => {
 
     let { cartId, productId, removeProduct } = req.body;
 
-    if (!isValidObjectId(cartId))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter valid cartId" });
-
     if (!isValidObjectId(productId))
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid productId" });
 
-    if (removeProduct != 1 && removeProduct != 0)
+    if (parseInt(removeProduct) != 1 && parseInt(removeProduct) != 0)
       return res.status(400).send({
         status: false,
         message: "Please enter valid removeProduct value as 1 or 0",
       });
 
-    let checkCartId = await cartModel.findById(cartId);
+    let checkCartId = await cartModel.findOne({ userId: userId });
 
     if (!checkCartId)
       return res
         .status(404)
-        .send({ status: false, message: "CartId doesnt exists" });
+        .send({ status: false, message: "Cart doesnt exists" });
 
-    if (checkCartId.userId != userId)
-      return res.status(403).send({
-        status: false,
-        message: "User is not authorized to access this cart",
-      });
+    if (cartId) {
+      if (!isValidObjectId(cartId))
+        return res
+          .status(400)
+          .send({ status: false, message: "Please enter valid cartId" });
+
+      if (checkCartId._id != cartId)
+        return res.status(403).send({
+          status: false,
+          message: "User is not authorized to access this cart",
+        });
+    }
 
     let thisProduct = await productModel.findOne({
       _id: productId,
@@ -199,15 +213,15 @@ const updateCart = async (req, res) => {
     if (flag == false)
       return res.status(404).send({
         status: false,
-        message: "Product has been deleted or is not present in cart",
+        message: "Product has already been deleted or is not present in cart",
       });
 
-    if (removeProduct == 0 || quantity == 1) {
+    if (parseInt(removeProduct) == 0 || quantity == 1) {
       update["$pull"] = { items: { productId: productId } }; //Used pull to remove an element from an array
       update.totalPrice =
         checkCartId.totalPrice - thisProduct.price * product[i].quantity;
       update.totalItems = checkCartId.totalItems - 1;
-    } else if (removeProduct == 1) {
+    } else if (parseInt(removeProduct) == 1) {
       update[`items.${i}.quantity`] = checkCartId.items[i].quantity - 1;
       update.totalPrice = checkCartId.totalPrice - thisProduct.price;
     }
@@ -219,7 +233,7 @@ const updateCart = async (req, res) => {
       });
 
     let updatedCart = await cartModel
-      .findOneAndUpdate({ _id: cartId }, update, { new: true })
+      .findOneAndUpdate({ userId: userId }, update, { new: true })
       .populate("items.productId", {
         __v: 0,
         createdAt: 0,
@@ -238,6 +252,7 @@ const updateCart = async (req, res) => {
   }
 };
 
+/////////////////////////////////----------------GET CART API-----------------------/////////////////////////////////////
 const getCart = async (req, res) => {
   try {
     let userId = req.params.userId;
@@ -262,6 +277,7 @@ const getCart = async (req, res) => {
   }
 };
 
+/////////////////////////////////----------------DELETE CART API-----------------------/////////////////////////////////////
 const deleteCart = async (req, res) => {
   try {
     let userId = req.params.userId;
