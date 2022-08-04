@@ -451,6 +451,12 @@ const updateProductValidations = async (req, res, next) => {
       "image/bmp",
     ];
 
+    if(req.body.productImage?.length==0)
+    return res.status(400).send({
+      status: false,
+      message: "Please upload a product image",
+    });
+
     if (file && file.length > 0) {
       if (!allowedExtension.includes(file[0].mimetype))
         return res.status(400).send({

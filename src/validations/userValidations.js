@@ -383,6 +383,13 @@ const putUserValidations = async (req, res, next) => {
       "image/gif",
       "image/bmp",
     ];
+
+    if(req.body.profileImage?.length==0)
+    return res.status(400).send({
+      status: false,
+      message: "Please upload a profile image",
+    });
+
     if (file && file.length > 0) {
       if (!allowedExtension.includes(file[0].mimetype))
         return res.status(400).send({
