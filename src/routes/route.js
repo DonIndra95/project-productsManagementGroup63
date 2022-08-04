@@ -30,9 +30,9 @@ router.put("/users/:userId/cart",authentication,authorization,updateCart)
 router.get("/users/:userId/cart",authentication,authorization,getCart)
 router.delete("/users/:userId/cart",authentication,authorization,deleteCart)
 
-//Oder APIs
-router.post("/users/:userId/orders",authentication,authorization,createOrder)
-router.put("/users/:userId/orders",authentication,authorization,updateOrder)
+//Order APIs
+router.post("/users/:userId/orders",createOrder)
+router.put("/users/:userId/orders",updateOrder)
 
 router.all("/*", (req, res) => {
     res.status(400).send("Invalid HTTP request")

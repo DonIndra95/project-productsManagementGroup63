@@ -1,67 +1,91 @@
 const { isValidObjectId } = require("mongoose");
 const orderModel = require("../models/orderModel");
-const userModel = require("../models/userModel");
-const productModel = require("../models/productModel");
-const { isValidRequest } = require("../validations/userValidations");
+const { isValidRequest, isValid } = require("../validations/userValidations");
 const cartModel = require("../models/cartModel");
-const { deleteCart } = require("./cartController");
 
 const createOrder = async function (req, res) {
   try {
-    if (!isValidRequest(req.body))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter valid input" });
+    //ASK TA
+    // if (!isValidRequest(req.body))
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, message: "Please enter valid input" });
 
     userId = req.params.userId;
 
-    let { productId, cancellable, status } = req.body;
-
-    // if(!isValidObjectId(productId))
-    //return res.status(400).send({status:false,message:"Please enter valid productId"})
-
-    //let availableProduct = await productModel.findOne({_id:productId,isDeleted:false})
-
-    //if(!availableProduct)
-    //return res.status(400).send({status:false,message:"Product not available or have been deleted"});
-
-    //   if(totalQuantity){
-    //     (!/^[1-9][0-9]?$/.test(totalQuantity))
-    //     return res.status(400).send({status:false,message:"Please enter a valid quantity number"})
-    //    }
+    let { cartId,cancellable, status } = req.body;
+    
+    if(status&&status!="pending")
+    return res
+        .status(400)
+        .send({ status: false, message: "Status can only be pending" });
 
     if (cancellable?.length == 0)
       return res
         .status(400)
         .send({ status: false, message: "Please enter the required value" });
 
+     if(cancellable){
     if ((cancellable != true && cancellable != false) || cancellable == null)
       return res
         .status(400)
         .send({
           status: false,
           message: "cancellable value should be either true or false",
-        });
+        });}
 
-    let cart = await cartModel
-      .findOne({ userId: userId })
-      .populate("items.productId");
+    let cart = await cartModel.findOne({ userId: userId }).populate("items.productId");
+
     if (!cart)
       return res.status(400).send({ status: false, message: "cart not found" });
+
+      if(cart.items.length==0)
+      return res.status(404).send({
+        status: false,
+        message: "No items found inside cart",
+      });
+
+
+      if (cartId?.length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Please enter cartId",
+      });
+
+    if (cartId) {
+
+      if(!isValid(cartId))
+      return res
+          .status(400)
+          .send({ status: false, message: "Please enter cartId" });
+
+      if (!isValidObjectId(cartId))
+        return res
+          .status(400)
+          .send({ status: false, message: "Please enter valid cartId" });
+
+      if (cart._id != cartId)
+        return res.status(403).send({
+          status: false,
+          message: "User is not authorized to access this cart",
+        });
+    }
 
     let order = {};
 
     let totalQuantity = 0;
-    // let items = cart.items
+    let titles="";
     cart.items.forEach((e) => {
       if (e.productId.isDeleted == true) {
-        cart.totalPrice -= e.productId.price * e.quantity;
-        cart.totalItems--;
-        cart.items.splice(cart.items.indexOf(e), 1);
+        titles+=`'${e.productId.title}'`+" "
+        // cart.totalPrice -= e.productId.price * e.quantity;
+        // cart.totalItems--;
+        // cart.items.splice(cart.items.indexOf(e), 1);
       } else if (e.productId.isDeleted == false) totalQuantity += e.quantity;
     });
+    if(titles.length>0)
+    return res.status(400).send({ status: false, message: `${titles}is deleted `});
 
-    // console.log(totalQuantity,cart)
 
     order.userId = userId;
     order.items = cart.items;
@@ -70,14 +94,18 @@ const createOrder = async function (req, res) {
     order.totalQuantity = totalQuantity;
     order.cancellable = cancellable;
     order.status = status;
-    await cart.save(); // This data is saved in db if changes occur
-    if (cart.items.length == 0)
-      return res.status(400).send({ status: false, message: "cart is empty" });
-
+  
     let createdOrder = await orderModel.create(order);
-    return res
-      .status(201)
-      .send({ status: true, message: "success", data: createdOrder });
+    res.status(201).send({ status: true, message: "Success", data: createdOrder });// here return is not used since we want JS to execute the bellow codes
+
+    let empty = [];
+
+    cart.items = empty;
+    cart.totalPrice = 0;
+    cart.totalItems = 0;
+
+    await cart.save();
+
   } catch (error) {
     console.log(error);
     return res.status(500).send({ status: false, message: error.message });
@@ -96,17 +124,28 @@ const updateOrder= async (req,res)=>{
 
     let{orderId,status}=req.body
 
+    if(!isValid(orderId))
+    return res
+        .status(400)
+        .send({ status: false, message: "Please enter orderId" });
+
     if(!isValidObjectId(orderId))
     return res
         .status(400)
         .send({ status: false, message: "Please enter valid orderId" });
 
-    let thisOrder=await orderModel.findOne({_id:orderId,isDeleted:false})
+    if(!["completed","cancelled"].includes(status))
+    return res
+        .status(400)
+        .send({ status: false, message: "Status can only be updated to cancelled or completed" });
+
+
+    let thisOrder=await orderModel.findOne({_id:orderId,isDeleted:false,status:"pending"})
 
     if(!thisOrder)
     return res
         .status(404)
-        .send({ status: false, message: "Order not found or is deleted" });
+        .send({ status: false, message: "Order not found or is deleted or is not pending" });
 
     if(thisOrder.userId !=userId)
     return res
@@ -117,28 +156,6 @@ const updateOrder= async (req,res)=>{
     return res
         .status(400)
         .send({ status: false, message: "This order can not be cancelled" });
-
-    if(status=="completed"){
-
-      let validCart = await cartModel.findOne({ userId: userId });
-
-    if (!validCart)
-      return res.status(404).send({ status: false, message: "No cart found" });
-
-    if (validCart.items.length == 0)
-      return res
-        .status(404)
-        .send({ status: false, message: "No items found inside cart" });
-
-    let empty = [];
-
-    validCart.items = empty;
-    validCart.totalPrice = 0;
-    validCart.totalItems = 0;
-
-    await validCart.save();
-
-    }
 
     let updatedOrder= await orderModel.findOneAndUpdate({_id:orderId},{status:status},{new:true})
 

@@ -193,7 +193,10 @@ const updateCart = async (req, res) => {
    
     //let thisProduct=checkCartId.items.find(e=>e.productId._id==productId)//this find is for array to reduce Db call
 
-    let thisProduct = await productModel.findOne({
+    let thisProduct = await pvalidCart
+    validCart
+    validCart
+    validCartroductModel.findOne({
       _id: productId,
       isDeleted: false,
     });
