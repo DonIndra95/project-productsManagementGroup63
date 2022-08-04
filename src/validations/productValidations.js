@@ -357,7 +357,7 @@ const updateProductValidations = async (req, res, next) => {
           isFreeShipping != "true" &&
           isFreeShipping != false &&
           isFreeShipping != "false") ||
-        isFreeShipping === null
+        isFreeShipping === null                         // to be removed
       )
         return res.status(400).send({
           status: false,
