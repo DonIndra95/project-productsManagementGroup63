@@ -6,10 +6,15 @@ const cartModel = require("../models/cartModel");
 const createOrder = async function (req, res) {
   try {
     //ASK TA
-    // if (!isValidRequest(req.body))
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: "Please enter valid input" });
+    if (!isValidRequest(req.body))
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter valid input" });
+
+    if(!["cartId","cancellable","status"].includes(req.body))
+    return res
+    .status(400)
+    .send({ status: false, message: "Inputs can either be cartId, cancellable or status" });
 
     userId = req.params.userId;
 
