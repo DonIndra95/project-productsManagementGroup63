@@ -383,7 +383,7 @@ const putUserValidations = async (req, res, next) => {
       "image/gif",
       "image/bmp",
     ];
-
+    console.log(req.body)
     if(req.body.profileImage?.length==0)
     return res.status(400).send({
       status: false,
@@ -391,7 +391,7 @@ const putUserValidations = async (req, res, next) => {
     });
 
     if (file && file.length > 0) {
-      if (!allowedExtension.includes(file[0].mimetype))
+      if (!allowedExtension.includes(file[0].mimetype))//defines extension type of the file being uploaded
         return res.status(400).send({
           status: false,
           message: "Image should be in required format",

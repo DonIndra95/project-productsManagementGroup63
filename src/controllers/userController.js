@@ -20,7 +20,7 @@ const userRegister = async (req, res) => {
     } else
       return res
         .status(400)
-        .send({ status: false, message: "Please upload file" });
+        .send({ status: false, message: "Please upload profile image" });
 
     let savedData = await userModel.create(data);
 

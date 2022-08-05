@@ -193,10 +193,7 @@ const updateCart = async (req, res) => {
    
     //let thisProduct=checkCartId.items.find(e=>e.productId._id==productId)//this find is for array to reduce Db call
 
-    let thisProduct = await pvalidCart
-    validCart
-    validCart
-    validCartroductModel.findOne({
+    let thisProduct = await productModel.findOne({
       _id: productId,
       isDeleted: false,
     });
@@ -226,12 +223,12 @@ const updateCart = async (req, res) => {
         message: "Product has already been deleted or is not present in cart",
       });
 
-    if (parseInt(removeProduct) == 0 || quantity == 1) {
+    if (removeProduct == 0 || quantity == 1) {
       update["$pull"] = { items: { productId: productId } }; //Used pull to remove an element from an array
       update.totalPrice =
         checkCartId.totalPrice - thisProduct.price * product[i].quantity;
       update.totalItems = checkCartId.totalItems - 1;
-    } else if (parseInt(removeProduct) == 1) {
+    } else if (removeProduct == 1) {
       update[`items.${i}.quantity`] = checkCartId.items[i].quantity - 1;
       update.totalPrice = checkCartId.totalPrice - thisProduct.price;
     }

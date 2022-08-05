@@ -16,7 +16,7 @@ const authentication = async function (req, res, next) {
     if (!token)
       return res
         .status(401)
-        .send({ status: false, message: "You are not logged in(token Missing)" });
+        .send({ status: false, message: "You are not logged in (token Missing)" });
 
     jwt.verify(token, "this is my secret key",function (err, decoded) {
         if (err) {
