@@ -6,7 +6,7 @@ const { isValidRequest, isValid } = require("./userValidations");
 
 //function for valid title
 const isValidTitle = (value) => {
-  return /^[a-zA-Z0-9 .-]+$/.test(value);
+  return /^\d*[a-zA-Z][a-zA-Z\d -&,]{2,}$/.test(value);
 };
 //function to remoce extra spaces
 const removeSpaces = (value) => {
@@ -17,16 +17,14 @@ const removeSpaces = (value) => {
   return value;
 };
 
-//function to checkprice
-// const isValidPrice = (value) => {
-//   if (typeof value == "undefined" || value == null) return false;
-//   if (typeof value !== "number") return false;
-//   return true;
-// };
+//function for valid title
+const isValidName = (value) => {
+  return /^\d*[a-zA-Z]$/.test(value);
+};
 
 //function for checkstyle
 const isValidStyle = (value) => {
-  return /^[a-zA-Z]{2,30}$/.test(value); //change regex
+  return /^\d*[a-zA-Z][a-zA-Z\d -&,]{2,}$/.test(value);
 };
 
 // function for array value verification
@@ -46,7 +44,8 @@ const convertToArray = function (value) {
   } else if (value?.length > 0) return checkValue(value);
   return false;
 };
-///////////////////////////////////-----------------------CREATE PRODUCT VALIDATIONS--------------------//////////////////////////////////////////
+
+/////////////////////////////////-----------------------CREATE PRODUCT VALIDATIONS--------------------////////////////////////////////////
 const createProductValidations = async (req, res, next) => {
   try {
     if (!isValidRequest(req.body))
@@ -106,32 +105,32 @@ const createProductValidations = async (req, res, next) => {
 
     data.price = Math.round(price * 100) / 100;
 
-    if (!isValid(currencyFormat))
-      return res.status(400).send({
-        status: false,
-        message: "Please enter currencyFormat ",
-      });
-
-    if (currencyFormat != "INR")
-      return res.status(400).send({
-        status: false,
-        message: "Currency format should be INR ",
-      });
-    data.currencyFormat = currencyFormat;
-
     if (!isValid(currencyId))
       return res.status(400).send({
         status: false,
         message: "Please enter currencyId ",
       });
 
-    if (currencyId != "₹")
+    if (currencyId != "INR")
       return res.status(400).send({
         status: false,
-        message: "currencyId should be ₹",
+        message: "Currency format should be INR ",
+      });
+    data.currencyId = currencyId;
+
+    if (!isValid(currencyFormat))
+      return res.status(400).send({
+        status: false,
+        message: "Please enter currencyFormat ",
       });
 
-    data.currencyId = currencyId;
+    if (currencyFormat != "₹")
+      return res.status(400).send({
+        status: false,
+        message: "currencyFormat should be ₹",
+      });
+
+    data.currencyFormat = currencyFormat;
 
     if (style?.length == 0)
       return res
@@ -265,18 +264,38 @@ const updateProductValidations = async (req, res, next) => {
         .status(400)
         .send({ status: false, message: "Please enter a valid productId" });
 
+    let validKeys = [
+      "title",
+      "description",
+      "price",
+      "isFreeShipping",
+      "style",
+      "availableSizes",
+      "installments",
+      "productImage",
+    ];
+
+    let flag = true;
+
+    Object.keys(req.body).map((e) => {
+      if (!validKeys.includes(e)) return (flag = false);
+    });
+
+    if (flag == false)
+      return res.status(400).send({
+        status: false,
+        message:
+          "Valid keys for updating are title,description,price,isFreeShipping,style,availableSizes,installments",
+      });
+
     let {
       title,
       description,
       price,
-      currencyId,
-      currencyFormat,
       isFreeShipping,
       style,
       availableSizes,
       installments,
-      isDeleted,
-      deletedAt,
     } = req.body;
 
     if (title?.length == 0)
@@ -313,12 +332,12 @@ const updateProductValidations = async (req, res, next) => {
         .status(400)
         .send({ status: false, message: "Please enter valid installments" });
 
-    if (currencyId || currencyFormat || isDeleted || deletedAt)
-      return res.status(400).send({
-        status: false,
-        message:
-          "You cannot update currencyId,currencyFormat,deletedAt & isDeleted fields ",
-      });
+    // if (currencyId || currencyFormat || isDeleted || deletedAt)
+    //   return res.status(400).send({
+    //     status: false,
+    //     message:
+    //       "You cannot update currencyId,currencyFormat,deletedAt & isDeleted fields ",
+    //   });
 
     let update = {};
 
@@ -353,11 +372,10 @@ const updateProductValidations = async (req, res, next) => {
 
     if (Object.hasOwn(req.body, "isFreeShipping")) {
       if (
-        (isFreeShipping != true &&
-          isFreeShipping != "true" &&
-          isFreeShipping != false &&
-          isFreeShipping != "false") ||
-        isFreeShipping === null                         // to be removed
+        isFreeShipping != true &&
+        isFreeShipping != "true" &&
+        isFreeShipping != false &&
+        isFreeShipping != "false"
       )
         return res.status(400).send({
           status: false,
@@ -451,11 +469,11 @@ const updateProductValidations = async (req, res, next) => {
       "image/bmp",
     ];
 
-    if(req.body.productImage?.length==0)
-    return res.status(400).send({
-      status: false,
-      message: "Please upload a product image",
-    });
+    if (req.body.productImage?.length == 0)
+      return res.status(400).send({
+        status: false,
+        message: "Please upload a product image",
+      });
 
     if (file && file.length > 0) {
       if (!allowedExtension.includes(file[0].mimetype))
@@ -485,4 +503,5 @@ module.exports = {
   createProductValidations,
   updateProductValidations,
   isValidTitle,
+  isValidName
 };

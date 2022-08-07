@@ -1,8 +1,8 @@
 const { isValidObjectId } = require("mongoose");
 const { uploadFile } = require("../aws/aws");
 const productModel = require("../models/productModel");
-const { isValidTitle } = require("../validations/productValidations");
-const { isValid } = require("../validations/userValidations");
+const { isValidTitle, isValidName } = require("../validations/productValidations");
+const { isValid, isValidRequest, isValidFname } = require("../validations/userValidations");
 
 /////////////////////////////////////-----------------CREATE PRODUCT API--------------------//////////////////////////////////////
 const createProduct = async (req, res) => {
@@ -39,6 +39,12 @@ const createProduct = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     let query = req.query;
+
+    if (isValidRequest(req.body))
+      return res.status(400).send({
+        status: false,
+        message: "Please enter input in query params",
+      });
 
     if (query) {
       let keys = Object.keys(query);
@@ -114,7 +120,7 @@ const getProducts = async (req, res) => {
       sizes.map((e) => {
         if (!allowedSizes.includes(e)) return (check = false);
       });
-      if (!check)
+      if (check == false)
         return res.status(400).send({
           status: false,
           message: "Sizes can only be S, XS, M, X, L, XL, XXL",
@@ -130,7 +136,7 @@ const getProducts = async (req, res) => {
           message: "Please enter a valid title name",
         });
 
-      if (!isValidTitle(query.name))
+      if (!isValidName(query.name))
         return res.status(400).send({
           status: false,
           message: "Please enter a valid title name",
@@ -161,7 +167,7 @@ const getProducts = async (req, res) => {
       if (query.priceSort != "1" && query.priceSort != "-1")
         return res.status(400).send({
           status: false,
-          message: "Please enter priceSort value as 1 or -1",
+          message: "Please enter priceSort value as 1 or -1 only",
         });
     }
 
@@ -174,7 +180,7 @@ const getProducts = async (req, res) => {
         .status(404)
         .send({ status: false, message: "No products found" });
 
-    res.status(200).send({ status: true, message: getProductDetails });
+    res.status(200).send({ status: true, message:"Success",data: getProductDetails });
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
   }
@@ -210,13 +216,13 @@ const getProductDetails = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     let data = req.productUpdate;
-    if (Object.keys(req.productUpdate).length == 0)
+    let productId = req.params.productId;
+    if (Object.keys(data).length == 0)
       return res.status(400).send({
         status: false,
         message: "Nothing to update ,please check your inputs",
       });
 
-    let productId = req.params.productId;
     let productUpdate = await productModel.findOneAndUpdate(
       { _id: productId, isDeleted: false },
       data,
@@ -228,7 +234,7 @@ const updateProduct = async (req, res) => {
         message: "No products found or product has been deleted",
       });
     res
-      .status(201)
+      .status(200)
       .send({ status: true, message: "Success", data: productUpdate });
   } catch (err) {
     console.log(err);
@@ -260,7 +266,11 @@ const deleteProduct = async (req, res) => {
 
     res
       .status(200)
-      .send({ status: true, message: "Success", data: deleteProduct });
+      .send({
+        status: true,
+        message: "Product has been deleted",
+        data: deleteProduct,
+      });
   } catch (err) {
     console.log(err);
     return res.status(500).send({ status: false, message: err.message });

@@ -45,11 +45,7 @@ const createCart = async (req, res) => {
         });
     } else quantity = 1;
 
-    console.log(quantity);
-
     let checkCartId = await cartModel.findOne({ userId: userId });
-
-    //console.log(checkCartId);
 
     if (cartId?.length == 0)
       return res.status(400).send({
@@ -62,6 +58,13 @@ const createCart = async (req, res) => {
         return res
           .status(400)
           .send({ status: false, message: "Please enter valid cartId" });
+
+      let checkCart = await cartModel.findById(cartId);
+
+      if (!checkCart)
+        return res
+          .status(400)
+          .send({ status: false, message: "CartId doesnt exist" });
 
       if (checkCartId._id != cartId)
         return res.status(403).send({
@@ -96,7 +99,7 @@ const createCart = async (req, res) => {
           checkCartId.totalPrice + thisProduct.price * quantity;
         update.totalItems = checkCartId.totalItems + 1;
       }
-      // console.log(update);
+
       let updatedCart = await cartModel
         .findOneAndUpdate({ userId: userId }, update, { new: true })
         .populate("items.productId", {
@@ -160,21 +163,21 @@ const updateCart = async (req, res) => {
         .status(400)
         .send({ status: false, message: "Please enter valid productId" });
 
-    if (removeProduct!= 1 && removeProduct!= 0)
+    if (removeProduct != 1 && removeProduct != 0)
       return res.status(400).send({
         status: false,
         message: "Please enter valid removeProduct value as 1 or 0",
       });
 
-    let checkCartId = await cartModel.findOne({ userId: userId })//.populate("items.productId");
+    let checkCartId = await cartModel.findOne({ userId: userId }); //.populate("items.productId");
 
     if (!checkCartId)
       return res
         .status(404)
         .send({ status: false, message: "Cart doesnt exists" });
 
-    if(checkCartId.items.length==0)
-    return res
+    if (checkCartId.items.length == 0)
+      return res
         .status(404)
         .send({ status: false, message: "No items found inside cart" });
 
@@ -190,7 +193,7 @@ const updateCart = async (req, res) => {
           message: "User is not authorized to access this cart",
         });
     }
-   
+
     //let thisProduct=checkCartId.items.find(e=>e.productId._id==productId)//this find is for array to reduce Db call
 
     let thisProduct = await productModel.findOne({
@@ -299,9 +302,7 @@ const deleteCart = async (req, res) => {
         .status(404)
         .send({ status: false, message: "No items found inside cart" });
 
-    let empty = [];
-
-    validCart.items = empty;
+    validCart.items = [];
     validCart.totalPrice = 0;
     validCart.totalItems = 0;
 

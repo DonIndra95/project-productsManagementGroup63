@@ -36,7 +36,7 @@ router.post("/users/:userId/orders",authentication,authorization,createOrder)
 router.put("/users/:userId/orders",authentication,authorization,updateOrder)
 
 router.all("/*", (req, res) => {
-    res.status(400).send("Invalid HTTP request")
+    res.status(400).send({status:false,message:"Invalid HTTP request"})
 })
 
 module.exports = router

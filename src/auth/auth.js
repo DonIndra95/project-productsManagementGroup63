@@ -5,7 +5,7 @@ const userModel = require("../models/userModel");
 const authentication = async function (req, res, next) {
   try {
     let bearerToken = req.headers["authorization"];
-    var token=null;
+    var token=null;   //If token is not found inside bearerToken,then command will go to line 16 since null is falsy value Token missing message will be shown
 
     if(typeof bearerToken!== "undefined"){
 

@@ -61,7 +61,7 @@ const loginUser = async (req, res) => {
 
     let checkPassword = bcrypt.compareSync(password, checkEmail.password);
     if (!checkPassword)
-      return res.status(400).send({ status: false, message: "Wrong password" });
+      return res.status(401).send({ status: false, message: "Wrong password" });
 
     const token = jwt.sign(
       {
@@ -89,7 +89,7 @@ const getUserDetails = async function (req, res) {
     if (!findUserDetails) {
       return res
         .status(404)
-        .send({ status: false, message: "User Not Found!!" });
+        .send({ status: false, message: "User Not Found!!!" });
     }
 
     res.status(200).send({

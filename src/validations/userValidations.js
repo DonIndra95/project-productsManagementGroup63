@@ -115,7 +115,7 @@ const userValidation = async (req, res, next) => {
     if (!isValidPassword(password))
       return res.status(400).send({
         status: false,
-        message: `'${password}' is not a valid password`,
+        message: `'${password}' is not a valid password,Password should contain 8 to 15 characters, one special character, a number and should not contain space`,
       });
 
     let bcrpytPassword = await bcrypt.hash(password, 10);
@@ -138,25 +138,57 @@ const userValidation = async (req, res, next) => {
     if (!allowedExtension.includes(file[0].mimetype))
       return res
         .status(400)
-        .send({ status: false, message: "Image should be in required format" });
+        .send({ status: false, message: "File should be an image" });
 
-    // if (!isValidObject(req.body.address)) {
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: "Please enter address" });
-    // }
+    if (!isValidObject(req.body.address)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter address" });
+    }
 
-    // if (!isValidObject(req.body.address.shipping)) {
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: "Please enter shipping address" });
-    // }
+    if (!isValidObject(req.body.address.shipping)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter shipping address" });
+    }
 
-    // if (!isValidObject(req.body.address.billing)) {
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: "Please enter billing address" });
-    // }
+  if (!isValid(req.body.address.shipping.pincode))
+    return res
+      .status(400)
+      .send({ status: false, message: "Please enter shipping pincode" });
+
+  if (!isValidPincode(req.body.address.shipping.pincode))
+    return res.status(400).send({
+      status: false,
+      message: "Please enter a valid shipping pincode",
+    });
+
+  if (!isValid(req.body.address.shipping.city))
+    return res
+      .status(400)
+      .send({ status: false, message: "Please enter shipping city" });
+
+  if (!isValidLname(req.body.address.shipping.city))
+    return res
+      .status(400)
+      .send({ status: false, message: "Please enter a valid shipping city" });
+
+  if (!isValid(req.body.address.shipping.street))
+    return res
+      .status(400)
+      .send({ status: false, message: "Please enter shipping street" });
+
+  if (!isValidStreet(req.body.address.shipping.street))
+    return res.status(400).send({
+      status: false,
+      message: "Please enter a valid shipping street",
+    });
+
+    if (!isValidObject(req.body.address.billing)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter billing address" });
+    }
 
     if (!isValid(req.body.address.billing.pincode))
       return res
@@ -190,37 +222,7 @@ const userValidation = async (req, res, next) => {
         message: "Please enter a valid billing street",
       });
 
-    if (!isValid(req.body.address.shipping.pincode))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter shipping pincode" });
-
-    if (!isValidPincode(req.body.address.shipping.pincode))
-      return res.status(400).send({
-        status: false,
-        message: "Please enter a valid shipping pincode",
-      });
-
-    if (!isValid(req.body.address.shipping.city))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter shipping city" });
-
-    if (!isValidLname(req.body.address.shipping.city))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter a valid shipping city" });
-
-    if (!isValid(req.body.address.shipping.street))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter shipping street" });
-
-    if (!isValidStreet(req.body.address.shipping.street))
-      return res.status(400).send({
-        status: false,
-        message: "Please enter a valid shipping street",
-      });
+     
     if (
       req.body.address.shipping.city != req.body.address.billing.city &&
       req.body.address.shipping.pincode == req.body.address.billing.pincode
@@ -607,33 +609,6 @@ const putUserValidations = async (req, res, next) => {
           message: "Please enter shipping or billing address",
         });
     }
-
-    //   "if pincode is same then city should be same also"
-    //   "if pincode is different then city can be same"///cross
-    //   "if city is different then pincode should be different"
-
-    //   if (
-    //     data["address.shipping.pincode"] ||
-    //     data["address.billing.pincode"] ||
-    //     data["address.shipping.city"] ||
-    //     data["address.billing.city"]
-    //   ) {
-    //     let checkUser = await userModel.findById(req.params.userId);
-    //     console.log(checkUser)
-
-    //     if(data["address.shipping.pincode"]||data["address.billing.pincode"]){
-    //       if((data["address.shipping.pincode"]==checkUser.billing.pincode)||(data["address.billing.pincode"]==checkUser.shipping.pincode)){
-    //         if(checkUser.address.shipping.city!=checkUser.address.billing.city)
-    //         return res.send(" pincode error")
-    //       }
-    //     }
-    //     if(data["address.shipping.city"]||data["address.billing.city"]){
-    //       if((data["address.shipping.city"]==checkUser.address.billing.city)||(data["address.billing.city"]==checkUser.address.shipping.city)){
-    //         if(checkUser.address.shipping.pincode!=checkUser.address.billing.pincode)
-    //         return res.send(" city error")
-    //       }
-    //   }
-    // }
 
     if (data.phone || data.email) {
       let unique = await userModel.findOne({

@@ -3,7 +3,7 @@ const orderModel = require("../models/orderModel");
 const { isValidRequest, isValid } = require("../validations/userValidations");
 const cartModel = require("../models/cartModel");
 
-////////////////////////////////---------------------CREATE ORDER API-----------------------------//////////////////////////////////////
+////////////////////////////////------------------------CREATE ORDER API-----------------------------//////////////////////////////////////
 const createOrder = async function (req, res) {
   try {
     if (!isValidRequest(req.body))
@@ -55,7 +55,7 @@ const createOrder = async function (req, res) {
     let cart = await cartModel.findOne({ userId: userId }).populate("items.productId");
 
     if (!cart)
-      return res.status(400).send({ status: false, message: "cart not found" });
+      return res.status(404).send({ status: false, message: "cart not found" });
 
     if (cart.items.length == 0)
       return res.status(404).send({
@@ -169,7 +169,7 @@ const updateOrder = async (req, res) => {
     if (thisOrder.userId != userId)
       return res.status(403).send({
         status: false,
-        message: "User is not authorized to place this order",
+        message: "User is not authorized to update this order",
       });
 
     if (thisOrder.cancellable == false && status == "cancelled")
